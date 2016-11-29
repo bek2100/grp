@@ -41,26 +41,6 @@ vec4 operator+(vec4 lhs, vec4 rhs){
 	return res;
 };
 
-vec4 operator-(vec4 lhs, vec4 rhs){
-	vec4 res;
-
-	res.x = lhs.x - rhs.x;
-	res.y = lhs.y - rhs.y;
-	res.z = lhs.z - rhs.z;
-	res.p = lhs.p - rhs.p;
-	return res;
-};
-
-vec4 operator/(vec4 lhs, double x){
-	vec4 res;
-
-	res.x = lhs.x / x;
-	res.y = lhs.y / x;
-	res.z = lhs.z / x;
-	res.p = lhs.p / x;
-	return res;
-};
-
 double& vec4::operator[](int indx){
 	if (indx == 0)
 		return x;
