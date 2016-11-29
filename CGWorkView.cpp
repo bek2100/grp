@@ -24,12 +24,16 @@ static char THIS_FILE[] = __FILE__;
 #include "MouseSensetiveDialog.h"
 #include "mat4.h"
 #include "ColorSelectionDialog.h"
+#include "PrespectiveControlDialog.h"
+#include "OtherOptionsDialog.h"
 #include <math.h>
 #include "line.h"
 #include <unordered_map>
 // For Status Bar access
 #include "MainFrm.h"
 
+extern std::vector<model> models;
+extern IPFreeformConvStateStruct CGSkelFFCState;
 
 
 // Use this macro to display text messages in the status bar.
@@ -80,9 +84,10 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_LIGHT_CONSTANTS, OnLightConstants)
 	ON_COMMAND(ID_BUTTON_TRANS_TOGGLE, OnActionToggleView)
 	ON_COMMAND(ID_OPTIONS_MOUSESENSITIVITY, OnOptionMouseSensetivity)
+	ON_COMMAND(ID_OPTIONS_PERSPECTIVECONTROL, OnOptionPrespectiveControl)
+	ON_COMMAND(ID_OPTIONS_OTHEROPTIONS, OnOptionOthers)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_TRANS_TOGGLE, OnUpdateActionToggleView)
 	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_POLYGON_GIVEN, &CCGWorkView::OnPolygonGiven)
 END_MESSAGE_MAP()
 
 
@@ -104,11 +109,11 @@ CCGWorkView::CCGWorkView()
 	m_nAction = ID_ACTION_ROTATE;
 	m_nView = ID_VIEW_ORTHOGRAPHIC;	
 	m_screen = NULL;
-	polygon_normal = NULL;
 
 	m_object_space_trans = false;
 	m_bound_box = false;
 	m_mouse_sensetivity = 1;
+	CGSkelFFCState.FineNess = 20;
 
 	m_bIsPerspective = false;
 	m_tarnsform[0][0] = 1;
@@ -121,9 +126,9 @@ CCGWorkView::CCGWorkView()
 	
 	m_prespective_trans[0][0] = 1;
 	m_prespective_trans[1][1] = 1;
-	m_prespective_trans[2][2] = m_presepctive_d / (m_presepctive_d - m_presepctive_alpha);
+	m_prespective_trans[2][2] = 1;
 	m_prespective_trans[2][3] = 1 / m_presepctive_d;
-	m_prespective_trans[3][2] = -m_presepctive_alpha * m_presepctive_d / (m_presepctive_d - m_presepctive_alpha);
+	
 
 
 	m_color_wireframe = RGB(0, 0, 0);
@@ -517,10 +522,12 @@ LRESULT CCGWorkView::OnMouseMovement(WPARAM wparam, LPARAM lparam){
 		m_tarnsform = temp_transform;
 
 		for (unsigned int m = 0; m < models.size(); m++){
-			if (m_object_space_trans)
-				models[m].obj_coord_trans = m_tarnsform * models[m].obj_coord_trans;
-			else
-				models[m].obj_coord_trans = models[m].obj_coord_trans * m_tarnsform;
+			if (models[m].active_model){
+				if (m_object_space_trans)
+					models[m].obj_coord_trans = m_tarnsform * models[m].obj_coord_trans;
+				else
+					models[m].camera_trans = models[m].camera_trans * m_tarnsform;
+			}
 		}
 
 		RenderScene();
@@ -541,8 +548,12 @@ LRESULT CCGWorkView::OnMouseMovement(WPARAM wparam, LPARAM lparam){
 };
 
 void CCGWorkView::DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color){
-	// TODO:
-	// use default line color
+	
+	// if the line is beyond the screen space, dont bother drawing it
+	if (!(((p1.z > m_presepctive_d && p2.z > m_presepctive_d) && !(p1.x <= 0 && p2.x <= 0) && !(p1.y <= 0 && p2.y <= 0))
+		&& (m_nView == ID_VIEW_PERSPECTIVE) ||
+		(m_nView == ID_VIEW_ORTHOGRAPHIC)))
+		return;
 
 	// algorithm vars
 	int x1, x2, y1, y2, dx, dy, d;
@@ -553,12 +564,12 @@ void CCGWorkView::DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color){
 
 	// midpoint algorithm
 
-	x1 = static_cast<int>(p1.x < p2.x ? p1.x / p1.p : p2.x / p2.p);
-	x2 = static_cast<int>(p1.x < p2.x ? p2.x / p2.p : p1.x / p1.p);
+	x1 = static_cast<int>(p1.x / p1.p < p2.x / p2.p ? p1.x / p1.p : p2.x / p2.p);
+	x2 = static_cast<int>(p1.x / p1.p < p2.x / p2.p ? p2.x / p2.p : p1.x / p1.p);
 
 	if (x1 != x2){
-		y1 = static_cast<int>(p1.x < p2.x ? p1.y / p1.p : p2.y / p2.p);
-		y2 = static_cast<int>(p1.x < p2.x ? p2.y / p2.p : p1.y / p1.p);
+		y1 = static_cast<int>(p1.x / p1.p < p2.x / p2.p ? p1.y / p1.p : p2.y / p2.p);
+		y2 = static_cast<int>(p1.x / p1.p < p2.x / p2.p ? p2.y / p2.p : p1.y / p1.p);
 	}
 	else{
 		y1 = static_cast<int>(min(p1.y / p1.p, p2.y / p2.p));
@@ -667,9 +678,9 @@ void CCGWorkView::DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color){
 	return;
 }
 
-void CCGWorkView::DrawBoundBox(COLORREF *arr, model &model, COLORREF color){
+void CCGWorkView::DrawBoundBox(COLORREF *arr, model &model, mat4 cur_transform, COLORREF color){
 
-	mat4 cur_transform = model.obj_coord_trans * model.view_space_trans * m_screen_space_trans;
+	//mat4 cur_transform = model.obj_coord_trans * model.view_space_trans * m_screen_space_trans;
 
 	double minx = model.min_vec.x;
 	double miny = model.min_vec.y;
@@ -718,27 +729,21 @@ void CCGWorkView::RenderScene() {
 	polygon cur_polygon;
 	mat4 cur_transform;
 	for (unsigned int m = 0; m < models.size(); m++){
+		
 		if (m_nView == ID_VIEW_ORTHOGRAPHIC){
-			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_screen_space_trans;
+			cur_transform = models[m].obj_coord_trans * models[m].camera_trans * models[m].view_space_trans * m_screen_space_trans;
 		}
 		else if (m_nView == ID_VIEW_PERSPECTIVE){
-			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
+			cur_transform = models[m].obj_coord_trans * models[m].camera_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
 		}
-		if (polygon_normal == ID_POLYGON_GIVEN){
-			for (unsigned int count = 0; count < models[m].polygons.size(); count++){
-				cur_polygon = models[m].polygons[count];
-				p1 = cur_polygon.Normal(true).p_a * cur_transform;
-				p2 = cur_polygon.Normal(true).p_b * cur_transform;
-				DrawLine(m_screen, p1, p2, models[m].color);
-			}
-		}
+
 		for (unsigned int pnt = 0; pnt < models[m].points_list.size(); pnt++){
-			p1 = (models[m].points_list[pnt].p_a)* cur_transform;
-			p2 = (models[m].points_list[pnt].p_b)* cur_transform;
+			p1 = models[m].points_list[pnt].p_a * cur_transform;
+			p2 = models[m].points_list[pnt].p_b * cur_transform;
 			DrawLine(m_screen, p1, p2, models[m].color);
 		}
 		if (m_bound_box){
-			DrawBoundBox(m_screen, models[m], m_boundbox_color);
+			DrawBoundBox(m_screen, models[m], cur_transform, m_boundbox_color);
 		}
 	}
 
@@ -858,8 +863,10 @@ void CCGWorkView::OnActionResetView()
 	reset_transform[3][3] = 1;
 
 	m_tarnsform = reset_transform;
-	for (unsigned int m = 0; m < models.size(); m++)
+	for (unsigned int m = 0; m < models.size(); m++){
 		models[m].obj_coord_trans = reset_transform;
+		models[m].camera_trans = reset_transform;
+	}
 	
 	RenderScene();
 }
@@ -962,14 +969,42 @@ void CCGWorkView::OnUpdateBoundBox(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_bound_box);
 }
 
-
 void CCGWorkView::OnOptionMouseSensetivity(){
-	MouseSensetiveDialog dlg;
-	dlg.DoModal();
-
-	m_mouse_sensetivity = dlg.m_mouse_sensetivity;
+	MouseSensetiveDialog dlg(m_mouse_sensetivity);
+	if (dlg.DoModal() == IDOK){
+		m_mouse_sensetivity = dlg.m_mouse_sensetivity;
+	}
 }
 
+void CCGWorkView::OnOptionPrespectiveControl(){
+	PrespectiveControlDialog dlg(m_presepctive_d);
+	if (dlg.DoModal() == IDOK){
+		m_presepctive_d = dlg.d;
+
+		m_prespective_trans[0][0] = 1;
+		m_prespective_trans[1][1] = 1;
+		m_prespective_trans[2][2] = 1;
+		m_prespective_trans[2][3] = 1 / m_presepctive_d;
+
+		Invalidate();
+	}
+}
+
+void CCGWorkView::OnOptionOthers(){
+
+	CString models_list;
+
+	for (int m = 0; m < models.size(); m++){
+		models_list += models[m].model_name + "\n";
+	}
+	OtherOptionsDialog dlg(CGSkelFFCState.FineNess, models_list);
+	if (dlg.DoModal() == IDOK){
+		CGSkelFFCState.FineNess = dlg.finess;
+		for (int m = 0; m < models.size(); m++){
+			models[m].active_model = dlg.active_modules[m];
+		}
+	}
+}
 // LIGHT SHADING HANDLERS ///////////////////////////////////////////
 
 void CCGWorkView::OnLightShadingFlat() 
@@ -1014,11 +1049,4 @@ void CCGWorkView::OnLightConstants()
 	    m_ambientLight = dlg.GetDialogData(LIGHT_ID_AMBIENT);
 	}	
 	Invalidate();
-}
-
-void CCGWorkView::OnPolygonGiven()
-{
-	// TODO: Add your command handler code here
-	polygon_normal = ID_POLYGON_GIVEN;
-
 }
