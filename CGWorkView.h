@@ -90,8 +90,12 @@ protected:
 	virtual void RenderScene();
 	virtual LRESULT OnMouseMovement(WPARAM wparam, LPARAM lparam);
 
-	mat4	m_tarnsform;
+	mat4 m_tarnsform;
 	mat4 m_screen_space_trans;
+	mat4 m_prespective_trans;
+	double m_presepctive_d;
+	double m_presepctive_alpha;
+
 	int m_mouse_xpos;
 	int m_mouse_ypos;
 	bool m_object_space_trans;
