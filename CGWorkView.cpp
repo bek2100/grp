@@ -114,6 +114,16 @@ CCGWorkView::CCGWorkView()
 	m_tarnsform[2][2] = 1;
 	m_tarnsform[3][3] = 1;
 
+	m_presepctive_d = 1;
+	m_presepctive_alpha = - m_presepctive_d;
+	
+	m_prespective_trans[0][0] = 1;
+	m_prespective_trans[1][1] = 1;
+	m_prespective_trans[2][2] = m_presepctive_d / (m_presepctive_d - m_presepctive_alpha);
+	m_prespective_trans[2][3] = 1 / m_presepctive_d;
+	m_prespective_trans[3][2] = -m_presepctive_alpha * m_presepctive_d / (m_presepctive_d - m_presepctive_alpha);
+
+
 	m_color_wireframe = RGB(0, 0, 0);
 	m_background_color = RGB(255, 255, 255);
 	m_boundbox_color = RGB(0, 0, 0);
@@ -267,9 +277,8 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	CCGWorkDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	//delete m_screen;
-	if (m_screen == NULL)
-		m_screen = (COLORREF*)calloc(m_WindowWidth * m_WindowHeight, sizeof(COLORREF));
+	delete m_screen;
+	m_screen = (COLORREF*)calloc(m_WindowWidth * m_WindowHeight, sizeof(COLORREF));
 
 	mat4 screen_space_scale;
 	mat4 screen_space_translate;
@@ -550,8 +559,8 @@ void CCGWorkView::DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color){
 		y2 = static_cast<int>(p1.x < p2.x ? p2.y / p2.p : p1.y / p1.p);
 	}
 	else{
-		y1 = static_cast<int>(min(p1.y, p2.y));
-		y2 = static_cast<int>(max(p1.y, p2.y));
+		y1 = static_cast<int>(min(p1.y / p1.p, p2.y / p2.p));
+		y2 = static_cast<int>(max(p1.y / p1.p, p2.y / p2.p));
 	}
 
 
@@ -701,19 +710,21 @@ void CCGWorkView::DrawBoundBox(COLORREF *arr, model &model, COLORREF color){
 
 void CCGWorkView::RenderScene() {
 	
-	std::fill_n(m_screen, m_WindowWidth * m_WindowHeight, m_background_color); //TODO background color select
+	std::fill_n(m_screen, m_WindowWidth * m_WindowHeight, m_background_color);
 	vec4 p1, p2;
 	line cur_line;
 	polygon cur_polygon;
 	mat4 cur_transform;
 	for (unsigned int m = 0; m < models.size(); m++){
-		cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_screen_space_trans;
+		if (m_nView == ID_VIEW_ORTHOGRAPHIC){
+			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_screen_space_trans;
+		}
+		else if (m_nView == ID_VIEW_PERSPECTIVE){
+			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
+		}
 		for (unsigned int pnt = 0; pnt < models[m].points_list.size(); pnt++){
 			p1 = models[m].points_list[pnt].p_a * cur_transform;
 			p2 = models[m].points_list[pnt].p_b * cur_transform;
-			//if (models[m].color == m_background_color )
-			//	DrawLine(m_screen, p1, p2, models[m].color ^ 0x00ffffff); //inverse the color of the object if it is the same as the screen
-			//else
 			DrawLine(m_screen, p1, p2, models[m].color);
 		}
 		if (m_bound_box){
@@ -728,8 +739,6 @@ void CCGWorkView::RenderScene() {
 		8 * 4,		 // Size of memory for one pixel in bits (in win32 4 bytes = 4*8 bits)
 		(void*)m_screen); // pointer to array
 
-	
-	//HDC src = CreateCompatibleDC(m_pDC->GetSafeHdc()); // hdc - Device context for window
 	SelectObject(m_hDC, m_map); // Inserting picture into our temp HDC
 
 	// Copy image from temp HDC to window
@@ -759,9 +768,6 @@ void CCGWorkView::OnFileLoad()
 		m_strItdFileName = dlg.GetPathName();		// Full path and filename
 		PngWrapper p;
 		CGSkelProcessIritDataFiles(m_strItdFileName, 1);
-		// Open the file and read it.
-		// Your code here...
-
 
 		Invalidate();	// force a WM_PAINT for drawing.
 	} 
