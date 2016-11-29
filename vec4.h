@@ -14,3 +14,5 @@ public:
 
 bool operator==(vec4 l, vec4 r);
 vec4 operator+(vec4 lhs, vec4 rhs);
+vec4 operator-(vec4 lhs, vec4 rhs);
+vec4 operator/(vec4 lhs, double x);

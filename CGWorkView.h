@@ -40,6 +40,7 @@ private:
 	int m_nAxis;				// Axis of Action, X Y or Z
 	int m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
+	int polygon_normal;
 	bool m_bIsPerspective;			// is the view perspective
 	
 	CString m_strItdFileName;		// file name of IRIT data
@@ -149,6 +150,8 @@ protected:
 	afx_msg void OnOptionMouseSensetivity();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnPolygonGiven();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

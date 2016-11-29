@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_OPTIONS_MOUSESENSITIVITY, OnOptionMouseSensetivity)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_TRANS_TOGGLE, OnUpdateActionToggleView)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_POLYGON_GIVEN, &CCGWorkView::OnPolygonGiven)
 END_MESSAGE_MAP()
 
 
@@ -103,6 +104,7 @@ CCGWorkView::CCGWorkView()
 	m_nAction = ID_ACTION_ROTATE;
 	m_nView = ID_VIEW_ORTHOGRAPHIC;	
 	m_screen = NULL;
+	polygon_normal = NULL;
 
 	m_object_space_trans = false;
 	m_bound_box = false;
@@ -722,9 +724,17 @@ void CCGWorkView::RenderScene() {
 		else if (m_nView == ID_VIEW_PERSPECTIVE){
 			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
 		}
+		if (polygon_normal == ID_POLYGON_GIVEN){
+			for (unsigned int count = 0; count < models[m].polygons.size(); count++){
+				cur_polygon = models[m].polygons[count];
+				p1 = cur_polygon.Normal(true).p_a * cur_transform;
+				p2 = cur_polygon.Normal(true).p_b * cur_transform;
+				DrawLine(m_screen, p1, p2, models[m].color);
+			}
+		}
 		for (unsigned int pnt = 0; pnt < models[m].points_list.size(); pnt++){
-			p1 = models[m].points_list[pnt].p_a * cur_transform;
-			p2 = models[m].points_list[pnt].p_b * cur_transform;
+			p1 = (models[m].points_list[pnt].p_a)* cur_transform;
+			p2 = (models[m].points_list[pnt].p_b)* cur_transform;
 			DrawLine(m_screen, p1, p2, models[m].color);
 		}
 		if (m_bound_box){
@@ -1004,4 +1014,11 @@ void CCGWorkView::OnLightConstants()
 	    m_ambientLight = dlg.GetDialogData(LIGHT_ID_AMBIENT);
 	}	
 	Invalidate();
+}
+
+void CCGWorkView::OnPolygonGiven()
+{
+	// TODO: Add your command handler code here
+	polygon_normal = ID_POLYGON_GIVEN;
+
 }

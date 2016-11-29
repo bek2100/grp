@@ -272,10 +272,17 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				if (temp_vert.z > max_vec.z || models.back().polygons.front().points.size() == 0) max_vec.z = temp_vert.z;
 
 				models.back().polygons[poly_cnt].points.push_back(temp_vert); // create an additional vertex
-
+				if (IP_HAS_PLANE_POLY(PPolygon) != 0){
+					models.back().polygons[poly_cnt].Plane[0] = PPolygon->Plane[0];
+					models.back().polygons[poly_cnt].Plane[1] = PPolygon->Plane[1];
+					models.back().polygons[poly_cnt].Plane[2] = PPolygon->Plane[2];
+					models.back().polygons[poly_cnt].Plane[3] = 0;
+				}
 				prev_temp_vert = temp_vert;
 				PVertex = PVertex -> Pnext;
 			}
+
+
 			while (PVertex != PPolygon -> PVertex && PVertex != NULL);
 			/* Close the polygon. */
 
