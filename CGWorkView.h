@@ -21,6 +21,7 @@
 #include "polygon.h"
 #include <vector>
 #include "model.h"
+extern std::vector<model> models;
 
 class CCGWorkView : public CView
 {
@@ -39,6 +40,7 @@ private:
 	int m_nAxis;				// Axis of Action, X Y or Z
 	int m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
+	int polygon_normal;
 	bool m_bIsPerspective;			// is the view perspective
 	
 	CString m_strItdFileName;		// file name of IRIT data
@@ -53,7 +55,7 @@ private:
 
 	// our functions
 	void DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color);
-	void DrawBoundBox(COLORREF *arr, model &m, mat4 cur_transform, COLORREF color);
+	void DrawBoundBox(COLORREF *arr, model &m, COLORREF color);
 	COLORREF m_color_wireframe;
 	COLORREF m_background_color;
 	COLORREF m_boundbox_color;
@@ -94,7 +96,6 @@ protected:
 	mat4 m_prespective_trans;
 	double m_presepctive_d;
 	double m_presepctive_alpha;
-	std::vector<bool> active_modules;
 
 	int m_mouse_xpos;
 	int m_mouse_ypos;
@@ -147,10 +148,10 @@ protected:
 	afx_msg void OnUpdateActionToggleView(CCmdUI* pCmdUI);
 	afx_msg void OnActionResetView();
 	afx_msg void OnOptionMouseSensetivity();
-	afx_msg void OnOptionPrespectiveControl();
-	afx_msg void OnOptionOthers();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnPolygonGiven();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

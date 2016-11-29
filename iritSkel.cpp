@@ -85,7 +85,7 @@ bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles)
 		IRIT_GEN_COPY(CrntViewMat, IPViewMat, sizeof(IrtHmgnMatType));
 
 	/* Here some useful parameters to play with in tesselating freeforms: */
-	//CGSkelFFCState.FineNess = 20;   /* Res. of tesselation, larger is finer. */
+	CGSkelFFCState.FineNess = 20;   /* Res. of tesselation, larger is finer. */
 	CGSkelFFCState.ComputeUV = TRUE;   /* Wants UV coordinates for textures. */
 	CGSkelFFCState.FourPerFlat = TRUE;/* 4 poly per ~flat patch, 2 otherwise.*/
 	CGSkelFFCState.LinearOnePolyFlag = TRUE;    /* Linear srf gen. one poly. */
@@ -131,16 +131,9 @@ bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles)
 	view_space_scale[1][1] = (double)1 / max_box;
 	view_space_scale[2][2] = (double)1 / max_box;
 	view_space_scale[3][3] = 1;
-	
-	CString indx;
-	CString file_full_name = FileNames.Mid(FileNames.ReverseFind('\\') + 1);
 
-	int n_tokens_pos = 0;
-	CString file_name = file_full_name.Tokenize(_T("."), n_tokens_pos);
 	for (int m = 0; m < model_cnt; m++){
 		models.rbegin()[m].view_space_trans = view_space_scale;
-		indx.Format(_T("%d"), m);
-		models.rbegin()[m].model_name = file_name + indx;
 	}
 
 	return true;
@@ -279,10 +272,17 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				if (temp_vert.z > max_vec.z || models.back().polygons.front().points.size() == 0) max_vec.z = temp_vert.z;
 
 				models.back().polygons[poly_cnt].points.push_back(temp_vert); // create an additional vertex
-
+				if (IP_HAS_PLANE_POLY(PPolygon) != 0){
+					models.back().polygons[poly_cnt].Plane[0] = PPolygon->Plane[0];
+					models.back().polygons[poly_cnt].Plane[1] = PPolygon->Plane[1];
+					models.back().polygons[poly_cnt].Plane[2] = PPolygon->Plane[2];
+					models.back().polygons[poly_cnt].Plane[3] = 0;
+				}
 				prev_temp_vert = temp_vert;
 				PVertex = PVertex -> Pnext;
 			}
+
+
 			while (PVertex != PPolygon -> PVertex && PVertex != NULL);
 			/* Close the polygon. */
 
