@@ -86,6 +86,10 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_POLYGON_CALCULATED, &CCGWorkView::OnPolygonCalculated)
 	ON_UPDATE_COMMAND_UI(ID_POLYGON_CALCULATED, &CCGWorkView::OnUpdatePolygonCalculated)
 	ON_UPDATE_COMMAND_UI(ID_POLYGON_GIVEN, &CCGWorkView::OnUpdatePolygonGiven)
+	ON_COMMAND(ID_VERTEX_GIVEN, &CCGWorkView::OnVertexGiven)
+	ON_UPDATE_COMMAND_UI(ID_VERTEX_GIVEN, &CCGWorkView::OnUpdateVertexGiven)
+	ON_COMMAND(ID_VERTEX_CALCULATED, &CCGWorkView::OnVertexCalculated)
+	ON_UPDATE_COMMAND_UI(ID_VERTEX_CALCULATED, &CCGWorkView::OnUpdateVertexCalculated)
 END_MESSAGE_MAP()
 
 
@@ -735,6 +739,15 @@ void CCGWorkView::RenderScene() {
 				DrawLine(m_screen, p1, p2, models[m].color);
 			}
 		}
+
+		if (vertex_normal == ID_VERTEX_GIVEN|| vertex_normal == ID_VERTEX_CALCULATED){
+			std::vector<line> vertex_normal = models[m].Normal(given_vertex_normal);
+			for (unsigned int count = 0; count < vertex_normal.size(); count++){
+				p1 = vertex_normal[count].p_a * cur_transform;
+				p2 = vertex_normal[count].p_b * cur_transform;
+				DrawLine(m_screen, p1, p2, models[m].color);
+			}
+		}
 		for (unsigned int pnt = 0; pnt < models[m].points_list.size(); pnt++){
 			p1 = (models[m].points_list[pnt].p_a)* cur_transform;
 			p2 = (models[m].points_list[pnt].p_b)* cur_transform;
@@ -1019,7 +1032,10 @@ void CCGWorkView::OnLightConstants()
 void CCGWorkView::OnPolygonGiven()
 {
 	// TODO: Add your command handler code here
-	polygon_normal = ID_POLYGON_GIVEN;
+	if (polygon_normal == ID_POLYGON_GIVEN)
+		polygon_normal = NULL;
+	else
+		polygon_normal = ID_POLYGON_GIVEN;
 	given_polygon_normal = true;
 	Invalidate();
 }
@@ -1028,7 +1044,10 @@ void CCGWorkView::OnPolygonGiven()
 void CCGWorkView::OnPolygonCalculated()
 {
 	// TODO: Add your command handler code here
-	polygon_normal = ID_POLYGON_CALCULATED;
+	if (polygon_normal == ID_POLYGON_CALCULATED)
+		polygon_normal = NULL;
+	else
+		polygon_normal = ID_POLYGON_CALCULATED;
 	given_polygon_normal = false;
 	Invalidate();
 }
@@ -1037,12 +1056,51 @@ void CCGWorkView::OnPolygonCalculated()
 void CCGWorkView::OnUpdatePolygonCalculated(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_nLightShading == ID_POLYGON_CALCULATED);
+	pCmdUI->SetCheck(polygon_normal == ID_POLYGON_CALCULATED);
 }
 
 
 void CCGWorkView::OnUpdatePolygonGiven(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_nLightShading == ID_POLYGON_GIVEN);
+	pCmdUI->SetCheck(polygon_normal == ID_POLYGON_GIVEN);
+}
+
+
+void CCGWorkView::OnVertexGiven()
+{
+	// TODO: Add your command handler code here
+	if (vertex_normal == ID_VERTEX_GIVEN)
+		vertex_normal = NULL;
+	else
+		vertex_normal = ID_VERTEX_GIVEN;
+	given_vertex_normal = true;
+	Invalidate();
+}
+
+
+void CCGWorkView::OnUpdateVertexGiven(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(vertex_normal == ID_VERTEX_GIVEN);
+
+}
+
+
+void CCGWorkView::OnVertexCalculated()
+{
+	// TODO: Add your command handler code here
+	if (vertex_normal == ID_VERTEX_CALCULATED)
+		vertex_normal = NULL;
+	else
+		vertex_normal = ID_VERTEX_CALCULATED;
+	given_vertex_normal = false;
+	Invalidate();
+}
+
+
+void CCGWorkView::OnUpdateVertexCalculated(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(vertex_normal == ID_VERTEX_CALCULATED);
 }

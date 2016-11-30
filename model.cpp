@@ -1,6 +1,5 @@
 #include "model.h"
 
-
 model::model()
 {
 	obj_coord_trans[0].x = 1;
@@ -25,4 +24,10 @@ model::model()
 
 model::~model()
 {
+}
+
+std::vector<line> model::Normal(bool given){
+	if (given)
+		return vertex_normals_list;
+	return vertex_normals_list_polygons;
 }

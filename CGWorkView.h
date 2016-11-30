@@ -41,7 +41,9 @@ private:
 	int m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
 	int polygon_normal;
+	int vertex_normal;
 	bool given_polygon_normal;
+	bool given_vertex_normal;
 	bool m_bIsPerspective;			// is the view perspective
 	
 	CString m_strItdFileName;		// file name of IRIT data
@@ -156,6 +158,10 @@ public:
 	afx_msg void OnPolygonCalculated();
 	afx_msg void OnUpdatePolygonCalculated(CCmdUI *pCmdUI);
 	afx_msg void OnUpdatePolygonGiven(CCmdUI *pCmdUI);
+	afx_msg void OnVertexGiven();
+	afx_msg void OnUpdateVertexGiven(CCmdUI *pCmdUI);
+	afx_msg void OnVertexCalculated();
+	afx_msg void OnUpdateVertexCalculated(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

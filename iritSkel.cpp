@@ -26,9 +26,21 @@ namespace std
 			return (hash<double>()(p.p_a.x + p.p_a.y) + hash<double>()(p.p_b.x + p.p_b.y));
 		}
 	};
+	template < >
+	struct hash<vec4>
+	{
+		size_t operator()(const vec4& p) const
+		{
+			// Compute individual hash values for two data members and combine them using XOR and bit shifting
+			return (hash<double>()(p.x) + hash<double>()(p.y) + hash<double>()(p.z));
+		}
+	};
 }
-std::unordered_map<line, int> lines;
 
+
+std::unordered_map<line, int> lines;
+std::unordered_map<vec4, int> vertex;
+std::unordered_map<vec4, std::vector<polygon>> vertex_polygons;
 
 IPFreeformConvStateStruct CGSkelFFCState = {
 	FALSE,          /* Talkative */
@@ -71,6 +83,8 @@ bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles)
 	IrtHmgnMatType CrntViewMat;
 
 	lines.clear();
+	vertex_polygons.clear();
+	vertex.clear();
 
 	/* Get the data files: */
 	IPSetFlattenObjects(FALSE);
@@ -261,11 +275,7 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				/* use if(IP_HAS_NORMAL_VRTX(PVertex)) to know whether a normal is defined for the vertex 
 				   access the vertex coords by PVertex->Coord
 				   access the vertex normal by PVertex->Normal */ 
-				if (IP_HAS_NORMAL_VRTX(PVertex)){
-
-				}
-
-
+				
 				temp_vert.x = PVertex->Coord[0];
 				temp_vert.y = PVertex->Coord[1];
 				temp_vert.z = PVertex->Coord[2];
@@ -280,6 +290,21 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				if (temp_vert.z > max_vec.z || models.back().polygons.front().points.size() == 0) max_vec.z = temp_vert.z;
 
 				models.back().polygons[poly_cnt].points.push_back(temp_vert); // create an additional vertex
+
+				
+				if (vertex[temp_vert] == 0){
+					vertex[temp_vert] ++;
+					if (IP_HAS_NORMAL_VRTX(PVertex)){
+						vec4 vertex;
+						vertex[0] = PVertex->Normal[0];
+						vertex[1] = PVertex->Normal[1];
+						vertex[2] = PVertex->Normal[2];
+						vertex[3] = PVertex->Normal[3];
+						models.back().vertex_normals_list.push_back(line(temp_vert, temp_vert + vertex));
+					}
+				}
+
+
 				prev_temp_vert = temp_vert;
 				PVertex = PVertex -> Pnext;
 			}
@@ -296,13 +321,30 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 	for (unsigned int p = 0; p < models.back().polygons.size(); p++){
 		for (unsigned int pnt = 0; pnt < models.back().polygons[p].points.size(); pnt++){
-			
+
 			p1 = models.back().polygons[p].points[(pnt) % models.back().polygons[p].points.size()];
 			p2 = models.back().polygons[p].points[(pnt + 1) % models.back().polygons[p].points.size()];
 			cur_line = line(p1, p2);
 			if (lines[cur_line] == 0){
 				models.back().points_list.push_back(cur_line);
 				lines[cur_line]++;
+			}
+			vertex_polygons[p1].push_back(models.back().polygons[p]);
+		}
+	}
+
+	for (unsigned int p = 0; p < models.back().polygons.size(); p++){
+		for (unsigned int pnt = 0; pnt < models.back().polygons[p].points.size(); pnt++){
+			vec4 pp = models.back().polygons[p].points[(pnt) % models.back().polygons[p].points.size()];
+			if (vertex[pp] == 1){
+				vertex[pp]++;
+				vec4 avr;
+				for (unsigned int j = 0; j <vertex_polygons[pp].size(); j++){
+					avr = avr + vertex_polygons[pp][j].Normal_Val(false);
+				}
+				avr = avr / vertex_polygons[pp].size();
+				cur_line = line(pp, pp + avr);
+				models.back().vertex_normals_list_polygons.push_back(cur_line);
 			}
 		}
 	}
