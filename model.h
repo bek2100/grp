@@ -22,6 +22,7 @@ public:
 	vec4 min_vec;
 	vec4 max_vec;
 
+
 	COLORREF color;
 };
 

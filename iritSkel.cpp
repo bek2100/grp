@@ -247,6 +247,12 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				PVertex = PVertex -> Pnext, i++);
 			/* use if(IP_HAS_PLANE_POLY(PPolygon)) to know whether a normal is defined for the polygon
 			   access the normal by the first 3 components of PPolygon->Plane */
+			if (IP_HAS_PLANE_POLY(PPolygon) != 0){
+				models.back().polygons[poly_cnt].Plane[0] = PPolygon->Plane[0];
+				models.back().polygons[poly_cnt].Plane[1] = PPolygon->Plane[1];
+				models.back().polygons[poly_cnt].Plane[2] = PPolygon->Plane[2];
+				models.back().polygons[poly_cnt].Plane[3] = 0;
+			}
 			PVertex = PPolygon -> PVertex;
 
 
@@ -255,7 +261,9 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				/* use if(IP_HAS_NORMAL_VRTX(PVertex)) to know whether a normal is defined for the vertex 
 				   access the vertex coords by PVertex->Coord
 				   access the vertex normal by PVertex->Normal */ 
+				if (IP_HAS_NORMAL_VRTX(PVertex)){
 
+				}
 
 
 				temp_vert.x = PVertex->Coord[0];
@@ -272,12 +280,6 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 				if (temp_vert.z > max_vec.z || models.back().polygons.front().points.size() == 0) max_vec.z = temp_vert.z;
 
 				models.back().polygons[poly_cnt].points.push_back(temp_vert); // create an additional vertex
-				if (IP_HAS_PLANE_POLY(PPolygon) != 0){
-					models.back().polygons[poly_cnt].Plane[0] = PPolygon->Plane[0];
-					models.back().polygons[poly_cnt].Plane[1] = PPolygon->Plane[1];
-					models.back().polygons[poly_cnt].Plane[2] = PPolygon->Plane[2];
-					models.back().polygons[poly_cnt].Plane[3] = 0;
-				}
 				prev_temp_vert = temp_vert;
 				PVertex = PVertex -> Pnext;
 			}

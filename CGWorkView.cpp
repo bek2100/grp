@@ -83,6 +83,9 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_TRANS_TOGGLE, OnUpdateActionToggleView)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_POLYGON_GIVEN, &CCGWorkView::OnPolygonGiven)
+	ON_COMMAND(ID_POLYGON_CALCULATED, &CCGWorkView::OnPolygonCalculated)
+	ON_UPDATE_COMMAND_UI(ID_POLYGON_CALCULATED, &CCGWorkView::OnUpdatePolygonCalculated)
+	ON_UPDATE_COMMAND_UI(ID_POLYGON_GIVEN, &CCGWorkView::OnUpdatePolygonGiven)
 END_MESSAGE_MAP()
 
 
@@ -724,11 +727,11 @@ void CCGWorkView::RenderScene() {
 		else if (m_nView == ID_VIEW_PERSPECTIVE){
 			cur_transform = models[m].obj_coord_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
 		}
-		if (polygon_normal == ID_POLYGON_GIVEN){
+		if (polygon_normal == ID_POLYGON_GIVEN || polygon_normal == ID_POLYGON_CALCULATED){
 			for (unsigned int count = 0; count < models[m].polygons.size(); count++){
 				cur_polygon = models[m].polygons[count];
-				p1 = cur_polygon.Normal(true).p_a * cur_transform;
-				p2 = cur_polygon.Normal(true).p_b * cur_transform;
+				p1 = cur_polygon.Normal(given_polygon_normal).p_a * cur_transform;
+				p2 = cur_polygon.Normal(given_polygon_normal).p_b * cur_transform;
 				DrawLine(m_screen, p1, p2, models[m].color);
 			}
 		}
@@ -783,9 +786,6 @@ void CCGWorkView::OnFileLoad()
 	} 
 
 }
-
-
-
 
 
 // VIEW HANDLERS ///////////////////////////////////////////
@@ -1020,5 +1020,29 @@ void CCGWorkView::OnPolygonGiven()
 {
 	// TODO: Add your command handler code here
 	polygon_normal = ID_POLYGON_GIVEN;
+	given_polygon_normal = true;
+	Invalidate();
+}
 
+
+void CCGWorkView::OnPolygonCalculated()
+{
+	// TODO: Add your command handler code here
+	polygon_normal = ID_POLYGON_CALCULATED;
+	given_polygon_normal = false;
+	Invalidate();
+}
+
+
+void CCGWorkView::OnUpdatePolygonCalculated(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_nLightShading == ID_POLYGON_CALCULATED);
+}
+
+
+void CCGWorkView::OnUpdatePolygonGiven(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_nLightShading == ID_POLYGON_GIVEN);
 }

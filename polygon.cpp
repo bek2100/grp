@@ -13,8 +13,10 @@ polygon::~polygon()
 line polygon::Normal(bool given){ 
 	vec4 start;
 	vec4 end;
-
-	start = points[0] / 2.0;
+	if (points.size() >= 3)
+		start = (points[0] + points[2]) / 2;
+	else
+		start = points[0];
 
 	if (given){
 		end = start + Plane;
@@ -29,7 +31,7 @@ line polygon::Normal(bool given){
 		plane[2] = a[0] * b[1] - a[1] * b[0];
 		plane[3] = 0;
 
-		end = start + plane;
+		end = start + plane / (sqrt(pow(plane[0], 2) + pow(plane[1], 2) + pow(plane[2], 2)));
 	}
 	return line(start, end);
 }
