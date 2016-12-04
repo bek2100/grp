@@ -18,6 +18,13 @@ MouseSensetiveDialog::MouseSensetiveDialog(CWnd* pParent /*=NULL*/)
 
 }
 
+MouseSensetiveDialog::MouseSensetiveDialog(double default_mouse_sensetivity, CWnd* pParent /*=NULL*/)
+	: CDialogEx(MouseSensetiveDialog::IDD, pParent)
+	, m_mouse_sensetivity(1)
+{
+	m_mouse_sensetivity = default_mouse_sensetivity;
+}
+
 MouseSensetiveDialog::~MouseSensetiveDialog()
 {
 }
@@ -27,7 +34,7 @@ void MouseSensetiveDialog::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 
 	DDX_Text(pDX, IDC_EDIT_MOUSESESNSETIVE, m_mouse_sensetivity);
-	DDV_MinMaxDouble(pDX, m_mouse_sensetivity, 0, m_mouse_sensetivity + 1);
+
 
 }
 

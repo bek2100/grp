@@ -26,10 +26,9 @@ vec4 polygon::Normal_Val(bool given){
 line polygon::Normal(bool given){ 
 	vec4 start;
 	vec4 end;
-	if (points.size() >= 3)
-		start = (points[0] + points[2]) / 2;
-	else
-		start = points[0];
+	for (unsigned int i = 0; i < points.size(); i++)
+		start = start + points[i];
+	start = start / points.size();
 
 	end = start + Normal_Val(given);
 

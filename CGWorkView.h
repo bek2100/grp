@@ -21,7 +21,6 @@
 #include "polygon.h"
 #include <vector>
 #include "model.h"
-extern std::vector<model> models;
 
 class CCGWorkView : public CView
 {
@@ -58,10 +57,12 @@ private:
 
 	// our functions
 	void DrawLine(COLORREF *arr, vec4 &p1, vec4 &p2, COLORREF color);
-	void DrawBoundBox(COLORREF *arr, model &m, COLORREF color);
+	void DrawBoundBox(COLORREF *arr, model &m, mat4 cur_transform, COLORREF color);
 	COLORREF m_color_wireframe;
 	COLORREF m_background_color;
 	COLORREF m_boundbox_color;
+	COLORREF m_vertex_norm_color;
+	COLORREF m_polygon_norm_color;
 
 	LightParams m_lights[MAX_LIGHT];	//configurable lights array
 	LightParams m_ambientLight;		//ambient light (only RGB is used)
@@ -99,6 +100,7 @@ protected:
 	mat4 m_prespective_trans;
 	double m_presepctive_d;
 	double m_presepctive_alpha;
+	std::vector<bool> active_modules;
 
 	int m_mouse_xpos;
 	int m_mouse_ypos;
@@ -151,6 +153,8 @@ protected:
 	afx_msg void OnUpdateActionToggleView(CCmdUI* pCmdUI);
 	afx_msg void OnActionResetView();
 	afx_msg void OnOptionMouseSensetivity();
+	afx_msg void OnOptionPrespectiveControl();
+	afx_msg void OnOptionOthers();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

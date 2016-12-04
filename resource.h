@@ -7,8 +7,10 @@
 #define IDR_CGWorkTYPE                  129
 #define IDD_LIGHTS_DLG                  134
 #define IDD_MATERIAL_DLG                136
-#define IDD_DIALOG_MOUSESENSETIVE       139
+#define IDD_MOUSESENSETIVE_DLG          139
 #define IDD_COLOR_DLG                   140
+#define IDD_PRESPECTIVE_DLG             141
+#define IDD_OTHERS_DLG                  142
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -41,6 +43,11 @@
 #define IDC_BUTTON1                     1042
 #define IDC_BUTTON2                     1043
 #define IDC_BUTTON3                     1044
+#define IDC_PRESPECTIVE_D               1045
+#define IDC_EDIT_FINESS                 1046
+#define IDC_EDIT_MODEL_LIST             1048
+#define IDC_BUTTON4                     1049
+#define IDC_BUTTON5                     1050
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -65,6 +72,7 @@
 #define ID_AXIS_XY                      32810
 #define ID_AXIS_XY32811                 32811
 #define ID_BOUNDBOX                     32814
+#define ID_OPTIONS_OTHEROPTIONS         32815
 #define ID_NORMAL_POLYGON               32815
 #define ID_POLYGON_GIVEN                32816
 #define ID_POLYGON_CALCULATED           32817
@@ -76,9 +84,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        141
-#define _APS_NEXT_COMMAND_VALUE         32821
-#define _APS_NEXT_CONTROL_VALUE         1045
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32816
+#define _APS_NEXT_CONTROL_VALUE         1051
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

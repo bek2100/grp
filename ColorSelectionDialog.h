@@ -13,6 +13,8 @@ public:
 		COLORREF m_color_wireframe, 
 		COLORREF m_boundbox_color, 
 		COLORREF m_background_color,
+		COLORREF m_vertex_norm_color,
+		COLORREF m_polygon_norm_color,
 		CWnd* pParent = NULL);
 	virtual ~ColorSelectionDialog();
 
@@ -27,8 +29,12 @@ public:
 	COLORREF wireframe_color;
 	COLORREF boundbox_color;
 	COLORREF background_color;
+	COLORREF vertex_norm_color;
+	COLORREF polygon_norm_color;
 	afx_msg void OnBackgroundColorClick();
 	afx_msg void OnWireframeColorClick();
 	afx_msg void OnBoundboxColorClick();
+	afx_msg void OnBnClickedButton5();
+	afx_msg void OnBnClickedButton4();
 };
 

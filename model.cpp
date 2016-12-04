@@ -1,5 +1,6 @@
 #include "model.h"
 
+
 model::model()
 {
 	obj_coord_trans[0].x = 1;
@@ -18,6 +19,14 @@ model::model()
 
 	inv_obj_coord_trans[3].p = 1;
 
+	camera_trans[0].x = 1;
+
+	camera_trans[1].y = 1;
+
+	camera_trans[2].z = 1;
+
+	camera_trans[3].p = 1;
+	active_model = true;
 	color = RGB(255, 255, 255);
 }
 

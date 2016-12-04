@@ -9,10 +9,11 @@ class MouseSensetiveDialog : public CDialogEx
 
 public:
 	MouseSensetiveDialog(CWnd* pParent = NULL);   // standard constructor
+	MouseSensetiveDialog(double default_mouse_sesitivity, CWnd* pParent = NULL);
 	virtual ~MouseSensetiveDialog();
 
 // Dialog Data
-	enum { IDD = IDD_DIALOG_MOUSESENSETIVE };
+	enum { IDD = IDD_MOUSESENSETIVE_DLG };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

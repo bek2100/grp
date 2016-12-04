@@ -21,7 +21,6 @@ vec4::~vec4()
 {
 }
 
-
 bool operator==(vec4 l, vec4 r){
 	if (l.x == r.x &&
 		l.y == r.y &&
