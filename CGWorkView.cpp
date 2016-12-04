@@ -745,7 +745,7 @@ void CCGWorkView::RenderScene() {
 			cur_transform = models[m].obj_coord_trans * models[m].camera_trans * models[m].view_space_trans * m_screen_space_trans;
 		}
 		else if (m_nView == ID_VIEW_PERSPECTIVE){
-			cur_transform = m_prespective_trans * models[m].obj_coord_trans * models[m].camera_trans * models[m].view_space_trans * m_screen_space_trans;
+			cur_transform = models[m].obj_coord_trans * models[m].camera_trans * models[m].view_space_trans * m_prespective_trans * m_screen_space_trans;
 		}
 		if (polygon_normal == ID_POLYGON_GIVEN || polygon_normal == ID_POLYGON_CALCULATED){
 			for (unsigned int count = 0; count < models[m].polygons.size(); count++){
